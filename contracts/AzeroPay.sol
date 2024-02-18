@@ -11,15 +11,15 @@ contract AzeroPay {
 
     mapping (string => Claim) public claims;
 
-    function create(string memory id) public payable {
+    function create(string memory id, address public_key) public payable {
         require(claims[id].public_key == address(0), "Already exists");
 
-        claims[id] = Claim(address(1), false, msg.value);
+        claims[id] = Claim(public_key, false, msg.value);
     }
 
-    function redeem(string memory id) public {
+    function redeem(string memory id, bytes memory signature) public {
         require(claims[id].public_key != address(0), "Does not exists");
-        // require(claims[id].public_key == public_key(id, signature), "Invalid signature");
+        require(claims[id].public_key == public_key(id, signature), "Invalid signature");
         require(claims[id].redeemed != true, "Already redeemed");
         
         payable(msg.sender).transfer(claims[id].value);
